@@ -1,89 +1,50 @@
 import streamlit as st
-import openai
-from gtts import gTTS
-from io import BytesIO
-import base64
 
-# ====== SETUP ======
-st.set_page_config(page_title="AI 상담 챗봇", page_icon="🤖", layout="centered")
+# 페이지 설정
+st.set_page_config(page_title="💬 무료 GPT 상담 챗봇", layout="centered")
 
-openai.api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else "YOUR_API_KEY_HERE"
+# 타이틀
+st.title("💬 무료 GPT 상담 챗봇")
+st.markdown("""
+학생 여러분, 고민이 있나요?  
+지금 이 챗봇과 함께 **진로, 성격, 친구, 공부, 가족 문제**에 대해 상담해보세요.  
+**무료이고, 설치가 필요 없으며**, 여러분의 고민을 친절하게 들어줄 거예요.  
+""")
 
-# ====== 기본 시스템 프롬프트 ======
-system_prompt = "당신은 따뜻하고 공감 잘하는 전문 상담사입니다. 친절하게 대화를 이어가 주세요."
-
-# ====== 초기 세션 상태 설정 ======
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "system", "content": system_prompt}
-    ]
-
-# ====== UI 구성 ======
-st.title("🧠 AI 상담 챗봇")
-st.markdown("선택한 주제나 자유롭게 궁금한 점을 입력해 주세요. 상담사는 GPT-4입니다 🤖")
-
+# 상담 주제
 topics = {
-    "진로 고민 🎓": "진로가 고민돼요. 어떤 직업이 저에게 잘 맞을까요?",
-    "학습 방법 🧠": "공부가 너무 어려워요. 어떻게 하면 효율적으로 할 수 있을까요?",
-    "인간관계 🤝": "친구들과의 관계에서 힘든 점이 있어요.",
-    "스트레스 💢": "요즘 스트레스를 많이 받아요. 어떻게 해소할 수 있을까요?",
-    "자기계발 🌱": "자기 계발을 하고 싶은데 무엇부터 시작하면 좋을까요?",
+    "진로 고민": "앞으로 어떤 직업을 가져야 할지 고민되고 방향이 잡히지 않을 때.",
+    "성격 분석": "내 성격에 대한 이해를 돕고 장단점을 파악하고 싶을 때.",
+    "학습 습관": "공부가 잘 안되거나 더 효과적인 방법을 찾고 싶을 때.",
+    "친구 관계": "친구와의 갈등이나 어색한 상황을 해결하고 싶을 때.",
+    "가족 문제": "가족과의 갈등이나 고민을 털어놓고 싶을 때."
 }
 
-col1, col2 = st.columns([2, 5])
-with col1:
-    selected_topic = st.selectbox("상담 주제", list(topics.keys()))
-with col2:
-    user_input = st.text_input("✍️ 상담할 내용을 입력하거나 주제를 선택하세요", key="input")
+# 상담 주제 선택
+selected_topic = st.selectbox("🧠 상담하고 싶은 주제를 선택하세요:", list(topics.keys()))
 
-send = st.button("💬 상담하기")
+# 주제에 대한 설명 출력
+if selected_topic:
+    st.markdown(f"### 📝 {selected_topic}")
+    st.info(topics[selected_topic])
 
-# ====== GPT-4 요청 및 응답 ======
-if send and (user_input or selected_topic):
-    user_message = user_input if user_input else topics[selected_topic]
+# 구분선
+st.markdown("---")
 
-    # 이전 대화에 추가
-    st.session_state.messages.append({"role": "user", "content": user_message})
+# 챗봇 설명
+st.subheader("🤖 아래 챗봇에게 질문해보세요!")
+st.markdown("""
+**예시 질문**:  
+- "공부가 잘 안돼요. 어떻게 해야 집중할 수 있을까요?"  
+- "저는 내성적인 편인데, 친구 사귀는 방법이 궁금해요."  
+- "성격이 너무 급한데, 고칠 수 있을까요?"  
 
-    with st.spinner("🤔 상담사가 생각 중입니다..."):
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",  # 또는 "gpt-3.5-turbo"
-                messages=st.session_state.messages,
-                temperature=0.7,
-                max_tokens=800,
-            )
-            assistant_reply = response.choices[0].message["content"]
-            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
-        except Exception as e:
-            st.error("⚠️ 에러 발생: " + str(e))
+**Tip**: 챗봇은 한국어도 잘 알아들어요!
+""")
 
-# ====== 채팅창 출력 ======
-st.divider()
-st.subheader("💬 상담 대화")
+# Hugging Face 챗봇 iframe (영구 무료)
+st.components.v1.iframe("https://huggingface.co/spaces/yuntian-deng/ChatGPT", height=600)
 
-for msg in st.session_state.messages:
-    if msg["role"] == "system":
-        continue  # 시스템 메시지는 표시 안 함
-    elif msg["role"] == "user":
-        st.chat_message("🧑‍💬 사용자").markdown(msg["content"])
-    else:
-        st.chat_message("🤖 상담사").markdown(msg["content"])
-
-        # ====== TTS 음성 출력 (GPT 응답만) ======
-        tts = gTTS(text=msg["content"], lang='ko')
-        audio_bytes = BytesIO()
-        tts.write_to_fp(audio_bytes)
-        audio_bytes.seek(0)
-        b64 = base64.b64encode(audio_bytes.read()).decode()
-        audio_html = f"""
-        <audio controls>
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-        </audio>
-        """
-        st.markdown(audio_html, unsafe_allow_html=True)
-
-# ====== 리셋 버튼 ======
-if st.button("🔄 상담 초기화"):
-    st.session_state.messages = [{"role": "system", "content": system_prompt}]
-    st.experimental_rerun()
+# 푸터
+st.markdown("---")
+st.caption("🧡 Made with Streamlit + Hugging Face | 설치 없이 누구나 무료로 사용할 수 있어요.")
