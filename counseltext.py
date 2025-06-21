@@ -53,10 +53,14 @@ for i, q in enumerate(questions, 1):
 # 프롬프트 조합 생성
 st.subheader("🧩 자동 생성 프롬프트:")
 
-# 간단한 조합 로직
 prompt = "안녕하세요. " + " ".join(random.sample(questions, min(2, len(questions)))) + " 조언 부탁드립니다."
-st.code(prompt, language="markdown")
 
-# ChatGPT 링크 안내
-st.markdown("👉 [ChatGPT로 이동하여 붙여넣기](https://chat.openai.com)")
-st.caption("💡 복사해서 붙여넣기만 하면 바로 상담이 가능합니다!")
+# 프롬프트 출력 및 복사 버튼
+st.text_area("📝 복사할 내용", prompt, height=100, key="chat_prompt")
+
+# 복사 버튼 (웹에서는 클립보드 접근이 제한적이므로, 텍스트 영역 선택 후 수동 복사를 유도)
+st.markdown("👉 아래 버튼을 눌러 ChatGPT로 이동한 후 위의 문장을 복사해 붙여넣으세요.")
+if st.button("🔗 ChatGPT로 이동하기"):
+    st.markdown(f"[chat.openai.com 로 이동](https://chat.openai.com)")
+
+st.caption("💡 위 텍스트 상자를 클릭하면 전체 선택 후 복사할 수 있어요!")
