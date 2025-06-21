@@ -4,7 +4,7 @@ import random
 st.set_page_config(page_title="상담 챗봇 도우미", page_icon="💬")
 st.title("💬 ChatGPT 상담 도우미")
 
-# 상담 주제와 추천 질문
+# 상담 주제별 질문 리스트
 topics = {
     "🎯 진로 고민": [
         "저는 적성에 맞는 직업을 찾고 싶습니다.",
@@ -47,8 +47,9 @@ topics = {
 selected_topic = st.selectbox("📌 상담 주제를 선택하세요", list(topics.keys()))
 questions = topics[selected_topic]
 
-# 프롬프트 조합
-combined_prompt = "안녕하세요. " + " ".join(random.sample(questions, min(2, len(questions)))) + " 조언 부탁드립니다."
+# 랜덤 질문 2~3개 선택해서 줄바꿈 포함한 프롬프트 조합
+sampled_questions = random.sample(questions, min(3, len(questions)))
+combined_prompt = "안녕하세요. 다음과 같은 고민이 있습니다:\n" + "\n".join(f"- {q}" for q in sampled_questions) + "\n조언 부탁드립니다."
 
 # 추천 질문 표시
 st.subheader("✍️ 추천 질문:")
@@ -57,9 +58,9 @@ for i, q in enumerate(questions, 1):
 
 # 생성된 문장 표시
 st.subheader("🧩 자동 생성 프롬프트")
-st.markdown(f"```\n{combined_prompt}\n```")
+st.text_area("복사할 내용", combined_prompt, height=150)
 
-# 복사 버튼 + 완료 메시지 표시
+# 복사 버튼 + 메시지 출력
 copy_code = f"""
 <script>
 function copyPrompt() {{
@@ -84,13 +85,13 @@ function copyPrompt() {{
 
 st.markdown(copy_code, unsafe_allow_html=True)
 
-# 다양한 챗봇 링크 안내
+# 챗봇 링크
 st.subheader("🌐 챗봇 상담 링크")
 st.markdown("""
-- 🤖 **[ChatGPT (공식)](https://chat.openai.com)**  
-- 🌟 **[Gemini (구글)](https://gemini.google.com/)**  
-- 💬 **[Claude (Anthropic)](https://claude.ai/)**  
-- 🧠 **[HuggingFace Chat](https://huggingface.co/chat/)**  
+- 🤖 [ChatGPT (OpenAI)](https://chat.openai.com)
+- 🌟 [Gemini (Google)](https://gemini.google.com/)
+- 💬 [Claude (Anthropic)](https://claude.ai/)
+- 🧠 [Hugging Face Chat](https://huggingface.co/chat)
 
-복사한 문장을 위 링크에 붙여 넣고 상담을 시작해 보세요!
+위 프롬프트를 복사하여 원하는 챗봇에 붙여 넣고 상담을 시작해 보세요.
 """)
