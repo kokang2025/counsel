@@ -19,7 +19,7 @@ selected_topic = st.selectbox("📌 상담 주제를 선택하세요", list(topi
 prompt = topics[selected_topic]
 
 # 프롬프트 보여주기
-st.subheader("✍️ 추천 질문 프롬프트:")
+st.subheader("✍️ 추천 질문을 복사하세요:")
 st.code(prompt, language="markdown")
 
 # 프롬프트 복사 기능 (Streamlit 웹에서는 JS로 대체 가능, 여기선 안내만)
