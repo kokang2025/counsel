@@ -4,6 +4,7 @@ import random
 st.set_page_config(page_title="상담 챗봇 도우미", page_icon="💬")
 st.title("💬 ChatGPT 상담 도우미")
 
+# 상담 주제와 추천 질문
 topics = {
     "🎯 진로 고민": [
         "저는 적성에 맞는 직업을 찾고 싶습니다.",
@@ -46,21 +47,50 @@ topics = {
 selected_topic = st.selectbox("📌 상담 주제를 선택하세요", list(topics.keys()))
 questions = topics[selected_topic]
 
+# 프롬프트 조합
+combined_prompt = "안녕하세요. " + " ".join(random.sample(questions, min(2, len(questions)))) + " 조언 부탁드립니다."
+
+# 추천 질문 표시
 st.subheader("✍️ 추천 질문:")
 for i, q in enumerate(questions, 1):
     st.markdown(f"**{i}.** {q}")
 
-# 프롬프트 조합 생성
-st.subheader("🧩 자동 생성 프롬프트:")
+# 생성된 문장 표시
+st.subheader("🧩 자동 생성 프롬프트")
+st.markdown(f"```\n{combined_prompt}\n```")
 
-prompt = "안녕하세요. " + " ".join(random.sample(questions, min(2, len(questions)))) + " 조언 부탁드립니다."
+# 복사 버튼 + 완료 메시지 표시
+copy_code = f"""
+<script>
+function copyPrompt() {{
+    navigator.clipboard.writeText(`{combined_prompt}`).then(function() {{
+        const status = document.getElementById("copy-status");
+        status.innerText = "✅ 복사 완료!";
+        status.style.color = "green";
+    }});
+}}
+</script>
+<button onclick="copyPrompt()" style="
+    background-color:#4CAF50;
+    color:white;
+    padding:10px 20px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:16px;
+">📋 프롬프트 복사하기</button>
+<p id="copy-status" style="margin-top:10px;font-weight:bold;"></p>
+"""
 
-# 프롬프트 출력 및 복사 버튼
-st.text_area("📝 복사할 내용", prompt, height=100, key="chat_prompt")
+st.markdown(copy_code, unsafe_allow_html=True)
 
-# 복사 버튼 (웹에서는 클립보드 접근이 제한적이므로, 텍스트 영역 선택 후 수동 복사를 유도)
-st.markdown("👉 아래 버튼을 눌러 ChatGPT로 이동한 후 위의 문장을 복사해 붙여넣으세요.")
-if st.button("🔗 ChatGPT로 이동하기"):
-    st.markdown(f"[chat.openai.com 로 이동](https://chat.openai.com)")
+# 다양한 챗봇 링크 안내
+st.subheader("🌐 챗봇 상담 링크")
+st.markdown("""
+- 🤖 **[ChatGPT (공식)](https://chat.openai.com)**  
+- 🌟 **[Gemini (구글)](https://gemini.google.com/)**  
+- 💬 **[Claude (Anthropic)](https://claude.ai/)**  
+- 🧠 **[HuggingFace Chat](https://huggingface.co/chat/)**  
 
-st.caption("💡 위 텍스트 상자를 클릭하면 전체 선택 후 복사할 수 있어요!")
+복사한 문장을 위 링크에 붙여 넣고 상담을 시작해 보세요!
+""")
